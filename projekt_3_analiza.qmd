@@ -1,0 +1,1068 @@
+---
+title: "Analiza wyborów czytelników"
+author: "Lidia Gozdecka"
+format:
+  html:
+    toc: true
+    toc-title: "spis tresci"
+    toc-depth: 2
+    toc-location: left
+    number-sections: false
+editor: visual
+echo: false
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#potrzebne biblioteki
+library(rio)
+library(dplyr)
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+library(httr)
+library(openxlsx)
+library(stringr)
+library(treemap)
+library(patchwork)
+library(beeswarm)
+library(geomtextpath)
+library(tm)
+library(wordcloud)
+library(tidytext)
+library(kableExtra)
+library(viridis)
+library(RColorBrewer)
+library(treemap)
+
+```
+
+```{r}
+#import danych
+data <- read_excel("C:\\moje\\IAD\\wizualizacja\\projekt\\analiza\\finished_clean_2.xlsx")
+
+#skracam tę nazwę, żeby była łatwiejsza w użytku
+data <- data %>%
+  mutate(Genre = str_replace(Genre, "utwór dramatyczny \\(dramat, komedia, tragedia\\)", "utwór dramatyczny")) %>% 
+  arrange(desc(Ratings))
+
+#dodaje kolumne Is_series
+#to kolumna  logiczna oznaczająca, czy dana pozycja jest częścią cyklu
+data$Is_series <- ifelse(grepl("single", data$Series_name), 0, 1)
+
+#dodaje kolumne z indeksem (miejsce w rankingu zw wzgley na liczbę ocen)
+data$rank <- rep(1:nrow(data))
+```
+
+```{r}
+#head(data, 10)
+#summary(data)
+
+
+```
+
+```{r}
+data_big <- read_excel("ranking_big_clean.xlsx")
+#head(data_big)
+
+#zmieniam nazwy kolumn na wygodne 
+names(data_big)<-c("title", "author", "avg_rating", "ratings", "readers", "opinions")
+data_big <- data_big %>% 
+  arrange(desc(ratings))
+#kolumna z indeksem
+data_big$rank <- rep(1:nrow(data_big))
+
+#usuwam braki
+data_big <- data_big %>% filter(avg_rating!=0)
+
+```
+
+## Wprowadzenie
+
+W ramach projektu badany jest wpływ cech jakościowych książek na ich popularność w sferze czytelniczej w Polsce, oraz analizowane są wybory i upodobania czytelników w okresie do końca 2024.
+
+Popularność serwisów służących do dzielenia się opiniami i prowadzenia kolekcji właśnie takie jak zawarty w tym projekcie portal lubimczytac.pl czy też inne podobne np. filmweb czy goodreads, pozwala przez analizowanie zawartych w nich danych badać upodobania konsumentów kultury popularnej w łatwiejszy i bardziej regularny sposób niż za pomocą ankiet czy sondaży.
+
+## Dane
+
+Dane wykorzystane w projekcie zostały zescrapowane ze portalu lubimyczytac.pl z rankingu książek wg liczby ocen (czyli najbardziej popularnych). Jest to strona pozwalająca użytkownikom na dodawanie przeczytanych lub zaplanowanych książek do wirtualnej biblioteczki oraz dzielenie się opiniami o nich.
+
+W tym procesie użyto pakietu rvest z R oraz wtyczki do Chrome SelectorGadget, która ułatwia odnajdywanie selektorów CSS.
+
+Pierwszy zestaw danych zawiera ponad 14k obserwacji - są to ogólne informacje dotyczące wszystkich książek znajdujących się w ww. rankingu. Te dane zostały zanalizowane pod kątem ogólnych charakterystyk takich jak np. korelacja pomiędzy liczbą czytelników a średnią oceną pozycji. Zestaw zawiera:
+
+-   tytuł
+
+-   autora
+
+-   średnią ocenę
+
+-   liczbę ocen (liczbę wystawionych ocen w skali 1 do 10)
+
+-   liczbę czytelników
+
+-   liczbę opinii (liczbę wystawionych recenzji - komentarzy)
+
+-   pozycję w rankingu
+
+```{r}
+kbl(head(data_big, 10), col.names=c("Tytuł", "Autor", "Średnia ocena", "Liczba ocen", "Liczba czytelników", "Liczba opinii", "Pozycja w rankingu"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+Drugi zestaw danych zawiera szczegołówe dane dotyczące kilkuset najbardziej popularnych pozycji (czyli te ze szczytu z rankingu z 1go zestawu danych). Ten zestaw został wykorzystany do oceny czynników wpływających na wybory czytelników. W zestawie zawarto dla każdej pozycji:
+
+-   Tytuł
+
+-   Autora
+
+-   Nazwę cyklu(serii, "single" - książka niebędąca częścią żadnego cyklu)
+
+-   Informację o tym, czy dana pozycja jest częścią jakiegokolwiek cyklu (0 - nie, 1 - tak)
+
+-   Średnią ocenę
+
+-   Gatunek
+
+-   Liczbę czytelników
+
+-   Liczbę ocen
+
+-   Liczbę opinii
+
+-   Liczbę stron
+
+-   Estymowany czas potrzebny na przeczytanie danej pozycji
+
+-   Informację o tym, czy dana pozycja jest lekturą (0 - nie, 1 - tak)
+
+-   Pozycję w rankingu
+
+-   Opis (zescrapowany z portalu, zazwyczaj pochodzi od wydawcy)
+
+```{r}
+data_show <- data %>% 
+  select(-Description)
+
+kbl(head(data_show, 10), col.names=c("Autor", "Średnia ocena", "Liczba ocen", "Liczba czytelników", "Liczba opinii", "Tytuł", "Lektura", "Gatunek", "Czas na przeczytanie", "Liczba stron", "Nazwa cyklu", "Liczba godzin", "Liczba minut", "Łączny czas", "Czy jest cyklem", "Pozycja w rankingu"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+## Przygotowanie danych
+
+Dane po pobraniu zostały oczyszczone:
+
+-   za pomocą pakietu stringr usunięto spacje i inne znaki błędnie pobrane przy scrapowaniu strony
+
+-   w nielicznych przypadkach braków w kolumnach "czas" oraz "liczba stron" uzupełniono je zerami, aby ich nie usuwać (ze względu na niewielką liczbę danych); zostały wykluczone jedynie we fragmentach analizujących wpływ właśnie tych zmiennych, aby uniknąć ryzyka zniekształcenia wyników przez wartości odstające
+
+-   usunięto nieliczne pozycje mające 0 ocen lub czytelników - nie wnoszą bowiem nic do badania
+
+Ze względu na fakt iż wszystkie książki na portalu są dodawane ręcznie przez użytkowników zdarzają się powtórzenia (np. różne wydania są wpisywane osobno) lub braki w danych szczegółowych, jednak problemy te nie zaistniały w części danych analizowanych pod kątem jakościowym.
+
+## Cel projektu
+
+Celem projektu jest przeanalizowanie zależności pomiędzy przedstawionymi zmiennymi w celu odpowiedzenia na pytania badawcze:
+
+1.  Jakie pozycje są najczęściej wybierane przez czytelników?
+
+    1.  Czy ma na to wpływ to, czy dana pozycja jest lekturą szkolną bądź częścią serii?
+    2.  Jacy autorzy są najbardziej popularni?
+    3.  Jakie gatunki są najczęściej wybierane?
+
+2.  Jaki wpływ na ocenę danej pozycji mają cechy jakościowe książek?
+
+    1.  To, czy jest lekturą (czyli czy jest czytana "z przymusu", czy dla przyjemności)
+    2.  To, czy jest częścią cyklu (rozpowszechnienie)
+    3.  Długość (ilość stron, co bezpośrednio przekłada się na czas potrzebny na daną pozycję)
+    4.  To, ile osób ją przeczytało (popularność)
+    5.  Gatunek
+
+## Hipotezy badawcze
+
+W odpowiedzi na zadane pytania postawiono hipotezy badawcze:
+
+1.  Najczęściej wybierane pozycje to książki znane w kulturze popularnej - np. dobrze znane serie fantasy, bądź lektury szkolne, oraz inne "lekkie" gatunki takie jak np. romans czy kryminał, a także najbardziej cenione klasyki literatury polskiej i zachodniej.
+
+    1.  Lektury z pewnością stanowią dużą część rankingu.
+
+    2.  Duży udział w rankingu mają również książki będące częścią serii.
+
+    3.  Najbardziej popularni są autorzy polscy lub angielskojęzyczni, z dużym dorobkiem literackim, tworzący beletrystykę.
+
+    4.  Najczęściej wybierane gatunki to te czytane dla przyjemności i rozrywki - fantastyka, kryminał, romans.
+
+2.  Wpływ na ocenę mają:
+
+    1.  Lektury, mimo powszechności, są średnio gorzej oceniane przez wzgląd na to, iż ich przeczytanie w przypadku większości zadeklarowanych czytelników było zapewne obowiązkiem.
+
+    2.  Książki będące częścią cyklu są zazwyczaj oceniane lepiej - cały cykl jest czytany tylko przez osoby, którym się spodobał, więc siłą rzeczy oceny bedą pozytywne.
+
+    3.  Najlepiej oceniane są książki krótsze bądź średniej długości - mogą być przystępniejsze od bardzo długich
+
+    4.  Książki bardzo popularne i ocenione przez tysiące użytkowników mają oceny wyższe - opinie negatywne są nielicznymi skrajnymi przypadkami, ponieważ nie podobająca się komuś lektura zazwczyaj nie jest kontynuowana.
+
+    5.  Najlepiej oceniane są gatunki typu fantasy, romans, kryminał - czyli lekkie i czytane dla przyjemności.
+
+# Analiza całości rankingu
+
+```{r}
+
+
+
+print(paste("Cała baza książek z lubimczytać zawiera ", count(unique(data_big[c("title", "author")]))
+, " unikatowych pozycji od ", length(unique(data_big$author)), " różnych autorów."))
+
+min_ocena <- min(data_big$avg_rating)
+maks_ocena <- max(data_big$avg_rating)
+najgorsze_ksiazki <- data_big %>% 
+  select(title, author) %>% 
+  filter(data_big$avg_rating==min_ocena)
+
+najlepsze_ksiazki <- data_big %>% 
+  select(title, author) %>% 
+  filter(data_big$avg_rating==maks_ocena)
+
+print(paste("Najniższa ocena to: ", min_ocena, " otrzymało ją ", nrow(najgorsze_ksiazki), " pozycji, a dokładniej: ",  najgorsze_ksiazki$title[1], ". "))
+ print(paste("Najlepszą ocene, tj  ", maks_ocena, " - otrzymała ", nrow(najlepsze_ksiazki), " książek, a dokładnie to: ", najlepsze_ksiazki$title, "."))
+
+
+```
+
+Tak wygląda kilka pierwszych wygrywających pozycji:
+
+```{r}
+kbl(head(data_big, 20), col.names=c("Tytuł", "Autor", "Średnia ocena", "Liczba ocen", "Liczba czytelników", "Liczba opinii", "Pozycja w rankingu")) %>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+
+
+```
+
+Poniższy wykres przedstawia rozkład ocen z całego rankingu - widać wyraźnie, że zdecydowana większość ocen oscyluje wokół 7.5 (w skali 1 do 10). Zapewnie wynika to z faktu, iż niewiele osób nie polubiwszy danej książki, zdecyduje się ją dokończyć i ocenić.
+
+```{r}
+library(shiny)
+sample_readers <- sample(data_big$readers,1000)
+avg_reader_count <- round((mean(sample_readers)),0)
+
+rate_density_big <- ggplot(data_big, aes(x=avg_rating)) + geom_density()
+#rate_density_big
+
+rate_density_histo <- ggplot(data_big, aes(x=avg_rating)) + 
+  geom_histogram(color="deeppink3", fill="deeppink2") +
+  labs(
+    title="Rozkład ocen książek w rankingu",
+    x = "Średnia ocena",
+    y = "Liczba ocen"
+  )+
+  theme_minimal()
+
+
+ui <- fluidPage(
+
+  div(
+    style = "height: 800px; width:800px; overflow: scroll;", 
+    plotOutput("myPlot")
+  )
+)
+
+
+server <- function(input, output) {
+  output$myPlot <- renderPlot({
+    rate_density_histo  
+  })
+}
+
+
+#shinyApp(ui = ui, server = server)
+rate_density_histo
+
+```
+
+**H 2.3. Książki przeczytane przez duża liczbę osób są średnio lepiej oceniane.**
+
+Poniższy wykres przedstawia związek pomiędzy średnią oceną a liczbą czytelników/liczbą ocen.
+
+Pomimo widocznego na wykresie lekkiego wzrostu średniej oceny wraz ze wzrostem liczby czytelników, współczynnik korelacji Pearsona jest niewielki- a więc nie ma znaczącej korelacji pomiędzy liczbą ocen/czytelników a wysokością średniej oceny.
+
+```{r}
+wyk_big_readers <- ggplot(data_big, aes(x=readers, y=avg_rating))+
+  geom_point(color="deeppink3")+
+  geom_smooth(method=lm, color="deeppink4")+
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Liczba czytelników a średnia ocena",
+    x="liczba czytelników",
+    y = "średnia ocena"
+  )+
+  theme_minimal()
+  #scale_color_gradient(low = "blue", high = "red")
+
+wyk_big_ratings <- ggplot(data_big, aes(x=ratings, y=avg_rating))+
+  geom_point(color="deeppink3")+
+  geom_smooth(method=lm, color="deeppink4") +
+  labs(
+    title="Liczba ocen a średnia ocena",
+    x="liczba ocen",
+    y="średnia ocena")+
+    theme_minimal()
+
+
+pears_readers <- round((cor(data_big$readers, data_big$avg_rating, method="pearson")),3)
+pears_ratings <- round((cor(data_big$ratings, data_big$avg_rating, method="pearson")),3)
+
+#print(paste("Współczynnik korelacji Pearsona pomiędzy liczbą czytelników a średnia oceną wynosi zaledwie ", pears_readers, " . Nie jest to zatem znacząca korelacja. Za to w przypadku badania korelacji pomiędzy średnią oceną a liczbą wystawionych ocen, współczynnik wynosi ", pears_ratings, " ."))
+
+print(paste("Współczynnik korelacji Pearsona pomiędzy liczbą czytelników a średnia oceną wynosi zaledwie ", pears_readers, " . Nie jest to zatem znacząca korelacja."))
+
+wrap_plots(wyk_big_readers, wyk_big_ratings, ncol=2)
+
+#wyk_big_readers
+
+```
+
+```{r, warning=FALSE, message=FALSE}
+#Ta zależność (a raczej jej brak) nie ulega zmianie przy odrzuceniu części zbioru:
+data_big_less <- data_big %>% 
+  filter(ratings<mean(data_big$ratings)&ratings>1000)
+
+data_big_less_2 <- data_big %>% 
+  filter(readers<mean(data_big$readers)&readers>1000)
+
+
+wyk_big_readers <- ggplot(data_big_less_2, aes(x=readers, y=avg_rating))+
+  geom_point(color="deeppink3")+
+  geom_smooth(method=lm, color="deeppink4")+
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Liczba czytelników a średnia ocena",
+    x="liczba czytelników",
+    y = "średnia ocena"
+  )+
+  theme_minimal()
+  #scale_color_gradient(low = "blue", high = "red")
+
+wyk_big_ratings <- ggplot(data_big_less, aes(x=ratings, y=avg_rating))+
+  geom_point(color="deeppink3")+
+  geom_smooth(method=lm, color="deeppink4") +
+  labs(
+    title="Liczba ocen a średnia ocena",
+    x="liczba ocen",
+    y="średnia ocena")+
+    theme_minimal()
+
+
+pears_readers <- round((cor(data_big$readers, data_big$avg_rating, method="pearson")),3)
+pears_ratings <- round((cor(data_big$ratings, data_big$avg_rating, method="pearson")),3)
+
+#print(paste("Współczynnik korelacji Pearsona pomiędzy liczbą czytelników a średnia oceną wynosi zaledwie ", pears_readers, " . Nie jest to zatem znacząca korelacja. Za to w przypadku badania korelacji pomiędzy średnią oceną a liczbą wystawionych ocen, współczynnik wynosi ", pears_ratings, " ."))
+
+#print(paste("Współczynnik korelacji Pearsona pomiędzy liczbą czytelników a średnia oceną wynosi zaledwie ", pears_readers, " . Nie jest to zatem znacząca korelacja."))
+
+#wrap_plots(wyk_big_readers, wyk_big_ratings, ncol=2)
+
+#wyk_big_readers
+```
+
+# Analiza najwyższych w rankingu pozycji
+
+## Analiza różnic między lekturami szkolnymi & cyklami, a resztą pozycji
+
+**H 1.1 Lektury z pewnością stanowią dużą część rankingu.**
+
+**H 1.2 Duży udział w rankingu mają również książki będące częścią serii.**
+
+Porównanie udziału i ocen lektur do innych książek:
+
+```{r}
+abs_avg <- mean(data$Avg_rating)
+print(paste("Średnia wszystkich ocen: ", round(abs_avg, 2)))
+
+liczba_lektur <- sum(data$Czy_lektura)
+liczba_nielektur <- nrow(data) - liczba_lektur
+procent_lektur <- round((liczba_lektur/liczba_nielektur)*100,0)
+
+data_first_100 <- data[1:min(100, nrow(data)), ]
+procent_100 <- round(((sum(data_first_100$Czy_lektura))/(nrow(data_first_100)-sum(data_first_100$Czy_lektura)))*100,1)
+print(paste("Spośród analizowanych ", nrow(data), " książek, ", liczba_lektur, " to lektury - poza nimi, jeszcze ", liczba_nielektur, " pozycji. Czyli lektury stanowią ", procent_lektur, " procent zbioru. Jednak jesli spojrzymy tylko na 100 pierwszych najpopularniejszych pozycji, to stanowią aż", procent_100, " procent."))
+
+
+
+d_lektury <- data %>% 
+  filter(Czy_lektura==1)
+
+d_nielektury <- data %>% 
+  filter(Czy_lektura==0)
+
+
+avg_lektur <- round(mean(d_lektury$Avg_rating),2)
+avg_nielektur<- round(mean(d_nielektury$Avg_rating),2)
+
+najlepsza_lektura <- d_lektury %>%
+  select(Title, Author, Avg_rating, Genre) %>% 
+  arrange(desc(Avg_rating)) %>% 
+  slice_head(n=1)
+
+najlepsza_nielektura <- d_nielektury %>%
+  select(Title, Author, Avg_rating, Genre) %>% 
+  arrange(desc(Avg_rating)) %>% 
+  slice_head(n=1)
+
+print(paste("Lektury średnio uzyskują ocenę ", avg_lektur, " a inne książki - ", avg_nielektur, "."))
+print(paste("Najlepiej oceniania lektura to: '", najlepsza_lektura$Title, "' oceniona na ", najlepsza_lektura$Avg_rating, " a najlepiej oceniona pozycja niebędąca lekturą to '", najlepsza_nielektura$Title, "' oceniona na ", najlepsza_nielektura$Avg_rating, " ."))
+
+
+```
+
+Zatem istotnie lektury mają dość duży udział w rankingu i średnio gorsze oceny. Wynika to zapewne z ich obowiązkowości - są powszechnie czytane, ale zazwyczaj z przymusu, co z pewnością wpływa na odbiór danego dzieła.
+
+Porównanie ocen i udziału książek będących elementami serii:
+
+```{r}
+d_series <- data %>% 
+  filter(Is_series==1)
+
+d_notseries <- data %>% 
+  filter(Is_series==0)
+
+
+series_avg <- round(mean(d_series$Avg_rating),1)
+notseries_avg <- round(mean(d_notseries$Avg_rating),1)
+print(paste("Książki będące częściami serii to ", round((nrow(d_series)/nrow(data))*100,1) , " procent; średnio otrzmują ocenę ", series_avg, " podczas gdy książki niebędące częścią serii są średnio oceniane na: ", notseries_avg, " ."))
+```
+
+Zatem istotnie książki będące elementem cyklu stanowią znacząca część zbioru danych i mają średnio lepsze oceny. Wynika to zapewne z faktu, że w wiele z najbardziej rozpowszechnionych w kulturze popularnej książek - np. Harry Potter, Wiedźmin czy Gra o tron - są właśnie seriami, tak jak zresztą większość literatury fantastycznej, która stanowi zdecydowaną większość w tym rankingu (co widać na wykresie w dalszej części opracowania). Podział zbioru ze względu na bycie lekturą oraz na bycie częścią serii obrazują poniższe wykresy:
+
+```{r}
+#tu procentowy udział lektur i serii
+library(waffle)
+
+
+liczby <- c(liczba_lektur, liczba_nielektur)
+grupa <- c("Lektury", "Nie lektury")
+data_wafel_0 <- data.frame(grupa, liczby)
+
+data_cykle <- data %>% 
+  filter(Is_series==1)
+
+data_niecykle <- data %>% 
+  filter(Is_series==0)
+
+
+liczby <- c(nrow(data_cykle), nrow(data_niecykle))
+grupa <- c("Cykl", "Nie cykl")
+data_wafel_1 <- data.frame(grupa, liczby)
+
+
+
+wafel_0 <- ggplot(data_wafel_0, aes(fill=grupa, values=liczby)) +
+  geom_waffle(color="grey1") +
+  scale_fill_manual(values = c("cornflowerblue", "deeppink3"))+
+  theme_void() +
+  labs(
+    title="Udział lektur i reszty książek w zbiorze"
+  )+
+  coord_fixed(ratio = 1) + 
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
+  )
+
+wafel_1 <- ggplot(data_wafel_1, aes(fill=grupa, values=liczby)) +
+  geom_waffle(color="grey1") +
+  scale_fill_manual(values = c("cornflowerblue", "deeppink3"))+
+  theme_void() +
+  labs(
+    title="Udział cykli i reszty książek w zbiorze"
+  )+
+  coord_fixed(ratio = 1) + 
+  theme(
+    panel.grid = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
+  )
+wrap_plots(wafel_0, wafel_1, ncol=1)
+#waffle(data_wafel_0, rows=10) + 
+```
+
+**H 4.1. Lektury, mimo powszechności, są średnio gorzej oceniane przez wzgląd na to, iż ich przeczytanie w przypadku większości zadeklarowanych czytelników było zapewne obowiązkiem.**
+
+**4.2. Książki będące częścią cyklu są zazwyczaj oceniane lepiej - cały cykl jest czytany tylko przez osoby, którym się spodobał, więc siłą rzeczy oceny bedą pozytywne.**
+
+Poniższe wykresy przedstawiają rozkład ocen w zależności:
+
+1\) od tego, czy dana pozycja jest częścią cyklu
+
+2\) od tego, czy dana pozycja jest lekturą
+
+```{r}
+
+#ze wzgledu na bycie częscia serii
+data_violin_series <-data %>% 
+  select(Avg_rating, Is_series) %>% 
+  gather(key="Is_series", value="Avg_rating")
+
+
+
+data_violin_series$Is_series <- as.factor(data_violin_series$Is_series)
+data_violin_series$Avg_rating <- as.numeric(data_violin_series$Avg_rating)
+
+wykres_violin_series <- ggplot(data_violin_series, aes(x=Is_series, y=Avg_rating, fill=Is_series)) + 
+  geom_violin()+
+  labs(
+    title="Rozkład ocen z uwzględnieniem bycia częścią cyklu", 
+    x = " ",
+    y = "Średnia ocena",
+    fill="Czy jest częścią cyklu"
+  )+
+    scale_fill_manual(
+    values=c("lightpink","lightblue"),
+    labels=c("Nie jest", "Jest")
+    )+
+  theme_minimal()
+
+
+
+
+#ze względu na bycie lekturą
+data_violin_lektura <-data %>% 
+  select(Avg_rating, Czy_lektura) %>% 
+  gather(key="Czy_lektura", value="Avg_rating")
+
+
+
+data_violin_lektura$Czy_lektura <- as.factor(data_violin_lektura$Czy_lektura)
+data_violin_lektura$Avg_rating <- as.numeric(data_violin_lektura$Avg_rating)
+
+wykres_violin_lektura <- ggplot(data_violin_lektura, aes(x=Czy_lektura, y=Avg_rating, fill=Czy_lektura)) + 
+  geom_violin()+
+  labs(
+    title="Rozkład ocen z uwzględnieniem bycia lekturą", 
+    x = " ",
+    y = "Średnia ocena",
+    fill="Czy jest lekturą"
+  )+
+  scale_fill_manual(
+    values=c("lightpink","lightblue"),
+    labels=c("Nie jest", "Jest")
+    )+
+  theme_minimal()
+
+
+
+wykres_violin_series 
+wykres_violin_lektura
+```
+
+Na przedstawionych wykresach widać, że:
+
+1\) książki będące częścią cyklu uzyskują nieco częściej nieco wyższe oceny niż książki stand-alone
+
+2\) książki niebędące lekturami wyraźnie otrzymują o wiele częściej pozytywne oceny, niż lektury.
+
+#### Długość książki a ocena
+
+```{r}
+
+cor_pages <- ggplot(data, aes(x=Pages, y=Avg_rating)) + 
+  geom_point(color="deeppink3") + 
+  geom_smooth(method="lm", color="deeppink4")+
+  labs(
+    title="Ocena w zależności od długości książki",
+    x="liczba stron",
+    y="średnia ocena"
+  )+
+  theme_minimal()
+
+
+data_p <- data
+data_p$length_cat <- cut(data_p$Pages, 
+                        breaks = c(0, 300, 600, 1000, Inf), 
+                        labels = c('0-300', '300-600', '600-1000', '1000+'),
+                        right = FALSE)
+
+
+kor_ocena_strony <- cor(data$Pages, data$Avg_rating, method="pearson")
+
+print(paste("Korelacja między średnią oceną a długością książki wynosi ", round(kor_ocena_strony,3), ". Jest to zatem umiarkowana korelacja."))
+data_p$time_cat <- cut(data_p$Pages, 
+                        breaks = c(0, 300, 600, 1000, Inf), 
+                        labels = c('0-300', '300-600', '600-1000', '1000+'),
+                        right = FALSE)
+data_p2 <- data
+quantiles <- quantile(data_p2$Pages, probs = seq(0, 1, by = 0.25)) 
+data_p2$length_cat<-cut(data_p2$Pages, 
+                       breaks = quantiles, 
+                       include.lowest = TRUE,
+                       labels = c('Q1', 'Q2', 'Q3', 'Q4'))
+
+data_p <- data_p %>% 
+  filter(Pages!=0)
+
+#head(data_p)
+#ten jest db
+box_pages <- ggplot(data_p, aes(x=length_cat, y=Avg_rating, fill=length_cat)) + 
+  geom_boxplot() +
+  labs(
+    title="Ocena w zależności od długości książki",
+    x="kategoria",
+    y="średnia ocena"
+  )+
+  theme_minimal()+
+  theme(
+    legend.position="none"
+  )+
+  scale_fill_manual(
+    values=c("lightpink","lightblue", "lightpink", "lightblue")
+    )
+
+box_pages_2 <- ggplot(data_p2, aes(x=length_cat, y=Avg_rating)) + 
+  geom_boxplot() +
+  labs(
+    title="Ocena w zależności od długości książki",
+    x="kategoria",
+    y="średnia ocena"
+  )+
+  theme_minimal()+
+  theme(
+    legend.position="none"
+  )
+  
+
+
+```
+
+**H 2.3. Najlepiej oceniane są książki krótsze bądź średniej długości - mogą być przystępniejsze od bardzo długich**
+
+Poniższe wykres obrazuje korelację pomiędzy średnią oceną książki a jej długością (liczba stron):
+
+```{r}
+cor_pages
+```
+
+Współczynnik korelacji Pearsona miał tu wartość nieco powyżej 0.3 z czego można wnioskować o umiarkowanym wpływie długości książki na ocenę. Poniższy wykres przedstawia tę zależność z podziałem książek na kategorie wg liczby stron (książki krótkie, średnie, długie i bardzo długie)
+
+```{r}
+#abcd
+box_pages
+#box_pages_2
+```
+
+O dziwo, pozycje znacząco dłuższe są średnio ocenianie lepiej. Prawdopodobnie ma na to wpływ dominujący wśród nich gatunek:
+
+```{r}
+
+data_najdlugie <- data_p %>% 
+  filter(length_cat=="1000+") %>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n()
+  )
+
+#head(data_najdlugie$Genre)
+
+data_dlugie <- data_p %>% 
+  filter(length_cat=="600-1000")%>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n()
+  )
+
+#head(data_dlugie$Genre)
+data_najdluzsze<- data_p %>% 
+  filter(length_cat=="600-1000" | length_cat=="1000+")%>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n()
+  )
+
+ggplot(data_najdluzsze, aes(x=Genre, y=count, fill=Genre)) +
+  geom_bar(stat="identity")+
+  labs(
+    title="Rozkład gatunków wśród najdłuższych książek",
+    x="Gatunek",
+    y="Liczba wystąpień"
+  )+
+  theme_minimal()+
+  scale_fill_manual(
+    values=rep(c("lightpink","lightblue"), length(data_najdluzsze$Genre))
+    )+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position="none"
+  )
+```
+
+Który jest zazwyczaj lepiej oceniany (opisane w dalszej części projektu).
+
+## Autorzy
+
+**H 2.Najbardziej popularni są autorzy polscy lub angielskojęzyczni, z dużym dorobkiem literackim, tworzący beletrystykę.**
+
+Grupuję dane wg autorów - zliczam, ile razy wystąpili w rankingu, jaka jest średnia ocena wszystkich ich książek, jakie gatunki, ile łącznie mają czytelników, ile stron łącznie napisali i ile czasu trzeby by, by je wszystkie przeczytać.
+
+Poniższa tabela przedstawia najbardziej popularnych (pod względem liczby ich książek, które znalazły się w rankingu):
+
+```{r}
+# Example: Group by the 'author' column and summarize data
+data_authors <- data %>%
+  group_by(Author) %>%
+  summarise(
+    count = n(),                # Count of books per author
+    avg_rating_author = round(mean(Avg_rating, na.rm = TRUE),1), # Average rating, ignoring NAs
+    #author_rating_count = round(sum(Ratings),0),
+    #author_opinion_count = round(sum(Opinions),0),
+    author_readers_count = round(sum(Readers),0),
+    ile_lektur = sum(Czy_lektura),
+    author_genres = paste(unique(Genre), collapse = ", "),
+    author_pages_count = round(sum(Pages),0),
+    author_total_time = round(sum(Total_time),0),
+    book_titles = paste(Title, collapse = ", "),
+    
+
+    .groups = "drop"            
+  ) %>% 
+  arrange(desc(count))
+
+#dane podzielone na grupki wg autorów, count - liczba ich wystapien, avg rate - ich srednia ocena
+
+data_authors_show <- data_authors %>% 
+  select("Author", "count", "ile_lektur", "avg_rating_author", "author_genres")
+kbl(head(data_authors_show, 12), col.names=c("Autor", "Liczba książek", "Liczba lektur", "Średnia ocena", "Gatunki"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+
+```
+
+Poniższy wykres obrazuje ilość książek przypadający na najbardziej popularnych autorów, wraz z dominującymi w ich twórczości gatunkami:
+
+```{r}
+
+data_authors_head <- data_authors %>% 
+  select(Author, count, author_genres) %>% 
+  filter(count>4) %>% 
+  arrange(desc(count))
+
+
+#kbl(data_authors_head)
+
+wykres_author_count <- ggplot(data_authors_head, aes(fill=author_genres, x=Author, y=count)) +
+  geom_bar(position="dodge", stat="identity")+
+  geom_text(aes(label = Author), vjust = -0.3) +
+    theme(
+    axis.title.x = element_blank(),  # Remove x-axis title
+    axis.text.x = element_blank(),
+    legend.key.size = unit(0.4, "cm"),  # Adjust size of legend keys (the boxes)
+    legend.text = element_text(size = 6)  # Adjust font size of legend text# Remove x-axis text (subtitles)
+  )
+
+#wykres_author_count
+
+
+df_long <- data_authors %>%
+  #separate_rows(author_genres, sep = ", ") %>%
+  mutate(author_genres = trimws(author_genres)) %>% 
+  filter(count>6)
+
+wykres_author_count_2 <- ggplot(df_long, aes(x = Author, fill = author_genres, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Autorzy największej liczby książek", 
+       x = "Autor", 
+       y = "Liczba książek", 
+       fill = "Gatunek") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 4),
+        legend.position = "bottom",
+        legend.key.size = unit(0.5, "cm")
+        )+
+    scale_color_viridis(discrete = TRUE, option = "A")+
+  scale_fill_viridis(discrete = TRUE)
+
+wykres_author_count_3 <- ggplot(df_long, aes(x = Author, fill = author_genres, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Autorzy największej liczby książek", 
+       x = "Autor", 
+       y = "Liczba książek", 
+       fill = "Gatunek") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 4),
+        legend.position = "bottom",
+        legend.key.size = unit(0.5, "cm")
+        )+
+    scale_fill_brewer(palette="Set3")
+
+
+#wykres_author_count_2
+wykres_author_count_3
+```
+
+##Najlepiej oceniani autorzy (z łączną oceną ich twórczości powyżej średniej):
+
+```{r}
+best_rated <- data_authors %>% 
+  filter(avg_rating_author>abs_avg) %>% 
+  select(Author, avg_rating_author, count, ile_lektur, book_titles, author_genres) %>% 
+  arrange(desc(avg_rating_author)) %>% 
+  slice_head(n=10)
+
+
+kbl(best_rated, col.names=c("Autor", "Średnia ocena autora", "Liczba książek", "Liczba lektur", "Tytuły", "Gatunki"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+```
+
+#Najbardziej popularni autorzy (ze względu na liczbę czytelników):
+
+```{r}
+most_popular_authors <- data %>% 
+  group_by(Author) %>% 
+  summarise(
+    count=n(),
+    readers_sum = sum(Readers)
+    
+  ) %>% 
+  arrange(desc(count)) %>% 
+  slice_head(n=10)
+
+kbl(most_popular_authors, col.names=c("Autor", "Liczba książek", "Łączna liczba czytelników"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+
+```
+
+## Gatunki
+
+**H 3.Najczęścięj wybierane gatunki to te czytane dla przyjemności i rozrywki - fantastyka, kryminał, romans.**
+
+Poniższe tabelki przedstawiają ilośc książek każdego gatunku w zestawieniu, odpowiednio
+
+1.  łącznie z lekturami
+
+```{r}
+data_genre <- data %>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n(),
+    .groups = "drop"
+  ) %>% 
+  arrange(desc(count))
+
+data_genre_bezlektur <- data %>% 
+  filter(Czy_lektura==0) %>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n(),
+    .groups = "drop"
+  ) %>% 
+  arrange(desc(count))
+
+kbl(data_genre, col.names=c("Gatunek", "Liczba pozycji"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+
+```
+
+2.  Wyłączając lektury:
+
+    ```{r}
+    kbl(data_genre_bezlektur, col.names=c("Gatunek", "Liczba pozycji"))%>% kable_styling(bootstrap_options = c("hover", "condensed", "responsive"))
+    ```
+
+Poniższe wykresy obrazują liczebności w danych gatunkach, odpowiednio razem z lekturami i bez lektur.
+
+Wielkość segmentu zależy od tego, ile książek danego gatunku znalazło się w rankingu.
+
+Biorąc pod uwagę lektury:
+
+```{r}
+treemap_all <- treemap(data_genre, 
+        index = c("Genre"), 
+        vSize = "count",   
+        vColor = "Genre", 
+        title="Liczebności gatunków",
+        palette = brewer.pal(n = 15, name = "Pastel2"),
+        draw = TRUE) 
+
+
+
+#tm_layout(tm, title = "My Treemap Title")
+```
+
+Wyłączając ze zbioru lektury:
+
+```{r}
+treemap_bezlektur <- treemap(data_genre_bezlektur, 
+        index = c("Genre"), 
+        vSize = "count",   
+        vColor = "Genre", 
+        title = "Liczebności gatunków - bez lektur",
+        palette = brewer.pal(n = 15, name = "Pastel2"),
+
+        draw = TRUE)
+```
+
+Widać wyraźnie dominację kryminały, fantastyki, literatury pięknej i młodzieżowej. Przy wyłączeniu ze zbioru lektur, stosunek większości gatunków pozostaje taki sam poza niewidocznym już udziałem utworu dramatycznego.
+
+**H 4.4. Najlepiej oceniane są gatunki typu fantasy, romans, kryminał - czyli lekkie i czytane dla przyjemności.**
+
+Poniższy wykres przedstawia rozkład ocen z podziałem na gatunek. Zostały tu przedstawione tylko gatunki o odpowiednio dużej liczbie pozycji (np. reportaży jest tylko parę, więc trudno tu mówić o rozkładzie ocen).
+
+```{r}
+data_wwrap<-data %>% 
+  filter(grepl("klasyka|literatura piękna|fantasy, science fiction|kryminał, sensacja, thriller|literatura młodzieżowa|literatura obyczajowa, romans", Genre))
+my_colors <- c("deeppink3", "deeppink3","deeppink3","deeppink3","deeppink3","deeppink3")
+oceny_gat <- ggplot(data_wwrap, aes(x = Avg_rating, fill=Genre)) +
+  geom_histogram(binwidth = 0.5) +
+  facet_wrap(~ Genre) +
+  labs(
+    title = "Rozkład ocen ze względu na gatunek",
+    x = "ocena",
+    y = "liczba ocen"
+    )+
+  theme_minimal()+
+  scale_color_manual(values=c("deeppink3", "deeppink3","deeppink3","deeppink3","deeppink3","deeppink3"))+
+  theme(legend.position = "none") 
+  
+  
+
+
+oceny_gat_all <- ggplot(data, aes(x = Avg_rating)) +
+  geom_histogram(binwidth = 0.5) +
+  facet_wrap(~ Genre) +
+  labs(
+    title = "Rozkład ocen ze względu na gatunek",
+    x = "ocena",
+    y = "liczba ocen"
+    )
+
+oceny_gat
+
+```
+
+Wyraźnie widać, że w fantastyce i kryminałach dominują pozytywne oceny, podczas gdy np. klasyka czy literatura pięna jest oceniana dość różnie.
+
+Poniższy wykres obrazuje również rozkład ocen ze względu na gatunek, ale liczba kropek odpowiadająca liczbie pozycji danego gatunku przystępniej niż histogram pomaga zwizualizow liczebność każdego z gatunków.
+
+```{r}
+data_1 <- data %>% 
+  select(Genre, Avg_rating) %>% 
+  group_by(Genre) %>% 
+  summarise(
+    count=n(),
+    .groups="drop"
+    
+  ) %>% 
+  arrange(desc(count)) %>% 
+  slice_head(n=10)
+
+data_2 <- data %>% 
+  filter(Genre %in% data_1$Genre)
+
+
+data_2$Genre <- as.factor(data_2$Genre)
+beeswarm_gatunki <- beeswarm(Avg_rating ~Genre,
+                             data=data_2,
+                             col=c("pink", "lightblue", "plum", "lightgoldenrod2", "skyblue", "thistle", "salmon", "palegreen", "orchid", "lightsalmon"),
+                            pch = 19,
+                            main = "Rozkład ocen wg gatunków",
+                            ylab="Średnia ocena",
+                            xlab="",
+                            cex.axis = 0.7, 
+                            las = 2,
+                            corral="gutter") 
+
+                            par(mar = c(8, 4, 4, 2))
+  #axis(1, at = 1:length(data), labels = c("fanatsy & scifi", "horror", "klasyka", "krymina&thriller", "lit. dziecięca", "lit. młodzieżowa", "romans&obyczajowa", "lit. piękna", "romantasy", "dramat"), 
+
+#+theme(panel.background=element_rect(fill="darkgrey", colour="darkgrey"))
+
+#beeswarm_gatunki
+
+
+
+```
+
+# Infografiki
+
+## Opisy książek
+
+Poniższy wykres przedstawia najczęściej pojawiąjące się w opisach słowa:
+
+```{r}
+#definiuje własną liste stop-słów 
+stop_words_polish <- c("się", "nie", "o", "a", "jej", "jego", "po", "przez", "czy", "jak", "ale", "i", "oraz", "to", "w", "na", "z", "do", "że", "dla", "jest", "być", "była", "było", "będą", "lub", "za", "by", "który", "która", "może", "jednak", "ich", "ma", "życie", "książka", "książki", "powieść", "powieści", "książki", "sobie", "gdy", "kiedy", "musi", "tak", "ją", "której", "wszystko", "od", "tylko", "co", "tym", "lat", "ze", "że", "go", "są", "jest", "także", "które", "przed", "tego", "coś", "którzy", "raz", "już", "pod", "też", "jeszcze", "siebie", "teraz", "nim", "tej", "roku", "wieku", "zawsze", "zostaje", "nigdy", "ta", "jako", "będzie", "swoją", "swoim", "choć", "kto", "aby", "niż", "wreszcie", "wiele", "jednym", "pierwszy", "drugi", "trylogii", "kontynuacja", "właśnie", "sposób", "tom", "pierwszy", "trzeci", "jeden", "wielu", "naprawdę", "swoich", "potrafi", "bardziej", "niej", "wydanie", "staje", "później", "którym", "której", "żeby", "aby", "bez", "gdzie", "lecz", "u", "dnia", "bardzo", "ona", "on", "nas", "was", "ich", "jedną", "jednego", "autor", "auotorka","on", "bo", "każdy", "wie", "dni", "ten", "również", "okazuje", "przy", "których", "odnaleźć", "miejsca", "czeka", "nad", "swojego", "im", "samym", "sam", "chce", "nad", "rok", "tam", "historii", "którą", "dlaczego", "swojej", "całym", "znajduje", "jedna","ponad", "wciąż", "we", "cyklu", "mu", "razem", "życia", "zaczyna", "razem", "którego", "dzięki", "nawet", "nią", "wydaje", "czas", "tych", "coraz", "raz", "wraz", "więcej", "czytelników", "wszystkich", "nich", "najbardziej", "świecie", "podczas", "jeśli", "nowe", "był", "była", "ani", "lata", "między", "ci", "jednocześcnie", "niego", "swoje", "moje", "aż", "coś", "odkrywa", "stanie", "czasie", "muszą", "jednocześnie", "ktoś", "mogą", "móc", "nic","można", "å","siä", "światowej", "latach", "podstawie", "wszyscy", "wprzód", "czasu", "ä", "e", "tę", "wśród", "czasów", "dwóch", "sobą", "tu", "wszystkich", "xx", "serii", "znaleźć", "trafia", "pewnego", "opowieść", "wkrótce", "mają", "rozpoczyna", "temu", "własne", "postaci", "literatury", "opowiada", "mnie", "sprawę", "jednej", "świata", "nikt", "trzy", "czasem","innych", "wszystkim")
+
+#definiuje liste słów niepotrzebnych
+stop_words_polish_2 <- c()
+
+
+# konwersja na korpus tekstowy
+corpus <- Corpus(VectorSource(data$Description))
+
+# Czyszczenie tekstu: usuwanie interpunkcji, liczb, skonw na małe litery
+corpus_clean <- corpus %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(stripWhitespace)
+
+
+#konwersja żeby dało sie tu użyć dplyr
+corpus_df <- data.frame(text = sapply(corpus_clean, as.character), stringsAsFactors = FALSE)
+
+
+
+# usuwanie stop-słów
+tidy_books <- corpus_df %>%
+  unnest_tokens(word, text) %>% 
+  filter(!word %in% stop_words_polish)
+
+
+
+
+
+
+
+# Liczenie częstotliwości słów
+word_freq <- tidy_books %>%
+  count(word, sort = TRUE)
+
+
+
+# Tworzenie wordcloud
+wordcloud_1 <- wordcloud(words = word_freq$word, 
+          freq = word_freq$n, 
+          min.freq = 15, # minimalna liczba wystąpień słów
+          scale = c(3, 0.5), # rozmiar słów
+          colors = brewer.pal(8, "Dark2"))
+
+
+```
+
+## Graf wizualizujący podobieństwa
+
+Na przedstawionym poniżej grafie figuruje, ze względu na czytelność, tylko około 200 pozycji (wybrano te z największą liczbą ocen). Graf przedstawia książki podobne do siebie ze względu na poziom indeksu prawdpodobieństwa, zależnego od:
+
+-   tego, czy są tego samego gatunku (warunek konieczny)
+
+-   czy mają tego samego autora
+
+-   czy są w tym samym cykly (serii)
+
+Widoczne zgrupowania to klastry najbardziej podobnych so siebie pozycji; największe znaczenie miał tu gatunek.
+
+![Wizualizacja wykonana w Gephi](graf.png){fig-align="center"}
+
+# Podsumowanie
+
+W wyniku analizy pozyskanych danych zauważono, że:
+
+-   na popularność książek największy wpływ ma przynależenie do kategorii literatury rozrywkowej i fikcyjnej
+
+-   na ocenę największy wpływ ma to, czy książka jest lekturą - jest wtedy oceniana gorzej
+
+-   na rozpowszechnienie największy wpływ ma to, czy dana książka jest częścią cyklu - te stanowiły znaczącą większość zbioru.
+
+Warto zauważyć, że przedstawione dane nie prezentują przekroju społeczeństwa, tylko dość niewielką grupę osób. Można śmiało przypuszczać, że ze strony służącej do prowadzenia czytelniczej historii i oceniania ulubionych dzieł korzystają tylko pasjonaci literatury, którzy czytają o wiele więcej niż przeciętna osoba (wg raportu BN w 2023 tylko 43% respondentów przeczytało w ciągu roku choć jedną książkę), i sięgają po bardziej zróżnicowane pozycje, niż osoba nie czytająca regularnie, która mogła mieć styczność tylko i wyłącznie z kanonem lektur i podręcznikami akademickimi. Do tego grona należą też z pewnością tylko osoby regularnie i swobodnie korzystające z internetu - co wyklucza np. większość seniorów i z pewnością wpływa na popularność poszczególnych gatunków (np. bardzo duży udział fantastyki i science fiction, a dość mały poza lekturami klasyków).
+
+## Źródła
+
+-   [Ranking na lubimyczytac](https://lubimyczytac.pl/katalog?page=1&listId=booksFilteredList&rating%5B%5D=0&rating%5B%5D=10&publishedYear%5B%5D=1200&publishedYear%5B%5D=2024&bookType=1&catalogSortBy=ratings-desc&paginatorType=Standard)
+
+-   [R graph gallery](https://r-graph-gallery.com/){.uri}
+
+-   [Raport o czytelnictwie](https://www.bn.org.pl/raporty-bn/stan-czytelnictwa-w-polsce/stan-czytelnictwa-w-polsce-w-2023)
+
+-   [SelectorGadget wtyczka do Chrome](https://chromewebstore.google.com/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb)

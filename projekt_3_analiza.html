@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lidia Gozdecka">
+
+<title>Analiza wyborów czytelników</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="projekt_3_analiza_files/libs/clipboard/clipboard.min.js"></script>
+<script src="projekt_3_analiza_files/libs/quarto-html/quarto.js"></script>
+<script src="projekt_3_analiza_files/libs/quarto-html/popper.min.js"></script>
+<script src="projekt_3_analiza_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="projekt_3_analiza_files/libs/quarto-html/anchor.min.js"></script>
+<link href="projekt_3_analiza_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="projekt_3_analiza_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="projekt_3_analiza_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="projekt_3_analiza_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="projekt_3_analiza_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<script src="projekt_3_analiza_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="projekt_3_analiza_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">spis tresci</h2>
+   
+  <ul class="collapse">
+  <li><a href="#wprowadzenie" id="toc-wprowadzenie" class="nav-link active" data-scroll-target="#wprowadzenie">Wprowadzenie</a></li>
+  <li><a href="#dane" id="toc-dane" class="nav-link" data-scroll-target="#dane">Dane</a></li>
+  <li><a href="#przygotowanie-danych" id="toc-przygotowanie-danych" class="nav-link" data-scroll-target="#przygotowanie-danych">Przygotowanie danych</a></li>
+  <li><a href="#cel-projektu" id="toc-cel-projektu" class="nav-link" data-scroll-target="#cel-projektu">Cel projektu</a></li>
+  <li><a href="#hipotezy-badawcze" id="toc-hipotezy-badawcze" class="nav-link" data-scroll-target="#hipotezy-badawcze">Hipotezy badawcze</a></li>
+  <li><a href="#analiza-całości-rankingu" id="toc-analiza-całości-rankingu" class="nav-link" data-scroll-target="#analiza-całości-rankingu">Analiza całości rankingu</a></li>
+  <li><a href="#analiza-najwyższych-w-rankingu-pozycji" id="toc-analiza-najwyższych-w-rankingu-pozycji" class="nav-link" data-scroll-target="#analiza-najwyższych-w-rankingu-pozycji">Analiza najwyższych w rankingu pozycji</a>
+  <ul class="collapse">
+  <li><a href="#analiza-różnic-między-lekturami-szkolnymi-cyklami-a-resztą-pozycji" id="toc-analiza-różnic-między-lekturami-szkolnymi-cyklami-a-resztą-pozycji" class="nav-link" data-scroll-target="#analiza-różnic-między-lekturami-szkolnymi-cyklami-a-resztą-pozycji">Analiza różnic między lekturami szkolnymi &amp; cyklami, a resztą pozycji</a></li>
+  <li><a href="#autorzy" id="toc-autorzy" class="nav-link" data-scroll-target="#autorzy">Autorzy</a></li>
+  <li><a href="#gatunki" id="toc-gatunki" class="nav-link" data-scroll-target="#gatunki">Gatunki</a></li>
+  </ul></li>
+  <li><a href="#infografiki" id="toc-infografiki" class="nav-link" data-scroll-target="#infografiki">Infografiki</a>
+  <ul class="collapse">
+  <li><a href="#opisy-książek" id="toc-opisy-książek" class="nav-link" data-scroll-target="#opisy-książek">Opisy książek</a></li>
+  <li><a href="#graf-wizualizujący-podobieństwa" id="toc-graf-wizualizujący-podobieństwa" class="nav-link" data-scroll-target="#graf-wizualizujący-podobieństwa">Graf wizualizujący podobieństwa</a></li>
+  </ul></li>
+  <li><a href="#podsumowanie" id="toc-podsumowanie" class="nav-link" data-scroll-target="#podsumowanie">Podsumowanie</a>
+  <ul class="collapse">
+  <li><a href="#źródła" id="toc-źródła" class="nav-link" data-scroll-target="#źródła">Źródła</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analiza wyborów czytelników</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Lidia Gozdecka </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="wprowadzenie" class="level2">
+<h2 class="anchored" data-anchor-id="wprowadzenie">Wprowadzenie</h2>
+<p>W ramach projektu badany jest wpływ cech jakościowych książek na ich popularność w sferze czytelniczej w Polsce, oraz analizowane są wybory i upodobania czytelników w okresie do końca 2024.</p>
+<p>Popularność serwisów służących do dzielenia się opiniami i prowadzenia kolekcji właśnie takie jak zawarty w tym projekcie portal lubimczytac.pl czy też inne podobne np. filmweb czy goodreads, pozwala przez analizowanie zawartych w nich danych badać upodobania konsumentów kultury popularnej w łatwiejszy i bardziej regularny sposób niż za pomocą ankiet czy sondaży.</p>
+</section>
+<section id="dane" class="level2">
+<h2 class="anchored" data-anchor-id="dane">Dane</h2>
+<p>Dane wykorzystane w projekcie zostały zescrapowane ze portalu lubimyczytac.pl z rankingu książek wg liczby ocen (czyli najbardziej popularnych). Jest to strona pozwalająca użytkownikom na dodawanie przeczytanych lub zaplanowanych książek do wirtualnej biblioteczki oraz dzielenie się opiniami o nich.</p>
+<p>W tym procesie użyto pakietu rvest z R oraz wtyczki do Chrome SelectorGadget, która ułatwia odnajdywanie selektorów CSS.</p>
+<p>Pierwszy zestaw danych zawiera ponad 14k obserwacji - są to ogólne informacje dotyczące wszystkich książek znajdujących się w ww. rankingu. Te dane zostały zanalizowane pod kątem ogólnych charakterystyk takich jak np. korelacja pomiędzy liczbą czytelników a średnią oceną pozycji. Zestaw zawiera:</p>
+<ul>
+<li><p>tytuł</p></li>
+<li><p>autora</p></li>
+<li><p>średnią ocenę</p></li>
+<li><p>liczbę ocen (liczbę wystawionych ocen w skali 1 do 10)</p></li>
+<li><p>liczbę czytelników</p></li>
+<li><p>liczbę opinii (liczbę wystawionych recenzji - komentarzy)</p></li>
+<li><p>pozycję w rankingu</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tytuł</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Średnia ocena</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba ocen</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba czytelników</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba opinii</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pozycja w rankingu</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i Kamień Filozoficzny</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">84701</td>
+<td style="text-align: right;">126347</td>
+<td style="text-align: right;">5137</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Komnata Tajemnic</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">70551</td>
+<td style="text-align: right;">105836</td>
+<td style="text-align: right;">2291</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i więzień Azkabanu</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">67667</td>
+<td style="text-align: right;">102262</td>
+<td style="text-align: right;">2223</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Czara Ognia</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">64215</td>
+<td style="text-align: right;">98009</td>
+<td style="text-align: right;">1882</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i Zakon Feniksa</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">59895</td>
+<td style="text-align: right;">91951</td>
+<td style="text-align: right;">1694</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Książę Półkrwi</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">58355</td>
+<td style="text-align: right;">89941</td>
+<td style="text-align: right;">1560</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i insygnia śmierci</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">57860</td>
+<td style="text-align: right;">89324</td>
+<td style="text-align: right;">2100</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hobbit, czyli tam i z powrotem</td>
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">7.7</td>
+<td style="text-align: right;">57037</td>
+<td style="text-align: right;">84765</td>
+<td style="text-align: right;">3063</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1984</td>
+<td style="text-align: left;">George Orwell</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53512</td>
+<td style="text-align: right;">91219</td>
+<td style="text-align: right;">3462</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mistrz i Małgorzata</td>
+<td style="text-align: left;">Michaił Bułhakow</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53139</td>
+<td style="text-align: right;">92115</td>
+<td style="text-align: right;">3363</td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>Drugi zestaw danych zawiera szczegołówe dane dotyczące kilkuset najbardziej popularnych pozycji (czyli te ze szczytu z rankingu z 1go zestawu danych). Ten zestaw został wykorzystany do oceny czynników wpływających na wybory czytelników. W zestawie zawarto dla każdej pozycji:</p>
+<ul>
+<li><p>Tytuł</p></li>
+<li><p>Autora</p></li>
+<li><p>Nazwę cyklu(serii, “single” - książka niebędąca częścią żadnego cyklu)</p></li>
+<li><p>Informację o tym, czy dana pozycja jest częścią jakiegokolwiek cyklu (0 - nie, 1 - tak)</p></li>
+<li><p>Średnią ocenę</p></li>
+<li><p>Gatunek</p></li>
+<li><p>Liczbę czytelników</p></li>
+<li><p>Liczbę ocen</p></li>
+<li><p>Liczbę opinii</p></li>
+<li><p>Liczbę stron</p></li>
+<li><p>Estymowany czas potrzebny na przeczytanie danej pozycji</p></li>
+<li><p>Informację o tym, czy dana pozycja jest lekturą (0 - nie, 1 - tak)</p></li>
+<li><p>Pozycję w rankingu</p></li>
+<li><p>Opis (zescrapowany z portalu, zazwyczaj pochodzi od wydawcy)</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Średnia ocena</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba ocen</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba czytelników</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba opinii</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tytuł</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Lektura</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Gatunek</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Czas na przeczytanie</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba stron</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Nazwa cyklu</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba godzin</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba minut</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Łączny czas</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Czy jest cyklem</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pozycja w rankingu</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">84701</td>
+<td style="text-align: right;">126347</td>
+<td style="text-align: right;">5137</td>
+<td style="text-align: left;">Harry Potter i Kamień Filozoficzny</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">5 godz. 20 min.</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">70551</td>
+<td style="text-align: right;">105836</td>
+<td style="text-align: right;">2291</td>
+<td style="text-align: left;">Harry Potter i Komnata Tajemnic</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">5 godz. 56 min.</td>
+<td style="text-align: right;">356</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">56</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">67667</td>
+<td style="text-align: right;">102262</td>
+<td style="text-align: right;">2223</td>
+<td style="text-align: left;">Harry Potter i więzień Azkabanu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">7 godz. 36 min.</td>
+<td style="text-align: right;">456</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">440</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">64215</td>
+<td style="text-align: right;">98009</td>
+<td style="text-align: right;">1882</td>
+<td style="text-align: left;">Harry Potter i Czara Ognia</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">12 godz. 44 min.</td>
+<td style="text-align: right;">764</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">740</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">59895</td>
+<td style="text-align: right;">91951</td>
+<td style="text-align: right;">1694</td>
+<td style="text-align: left;">Harry Potter i Zakon Feniksa</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+<td style="text-align: left;">15 godz. 59 min.</td>
+<td style="text-align: right;">959</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">920</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">58355</td>
+<td style="text-align: right;">89941</td>
+<td style="text-align: right;">1560</td>
+<td style="text-align: left;">Harry Potter i Książę Półkrwi</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">11 godz. 40 min.</td>
+<td style="text-align: right;">700</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">680</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">57860</td>
+<td style="text-align: right;">89324</td>
+<td style="text-align: right;">2100</td>
+<td style="text-align: left;">Harry Potter i insygnia śmierci</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: left;">13 godz. 0 min.</td>
+<td style="text-align: right;">780</td>
+<td style="text-align: left;">Harry Potter</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">800</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">7.7</td>
+<td style="text-align: right;">57037</td>
+<td style="text-align: right;">84765</td>
+<td style="text-align: right;">3063</td>
+<td style="text-align: left;">Hobbit, czyli tam i z powrotem</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+<td style="text-align: left;">5 godz. 20 min.</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: left;">single</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">320</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">George Orwell</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53512</td>
+<td style="text-align: right;">91219</td>
+<td style="text-align: right;">3462</td>
+<td style="text-align: left;">1984</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">literatura piękna</td>
+<td style="text-align: left;">7 godz. 12 min.</td>
+<td style="text-align: right;">432</td>
+<td style="text-align: left;">single</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">440</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Michaił Bułhakow</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53139</td>
+<td style="text-align: right;">92115</td>
+<td style="text-align: right;">3363</td>
+<td style="text-align: left;">Mistrz i Małgorzata</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">klasyka</td>
+<td style="text-align: left;">7 godz. 34 min.</td>
+<td style="text-align: right;">454</td>
+<td style="text-align: left;">single</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">440</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+</section>
+<section id="przygotowanie-danych" class="level2">
+<h2 class="anchored" data-anchor-id="przygotowanie-danych">Przygotowanie danych</h2>
+<p>Dane po pobraniu zostały oczyszczone:</p>
+<ul>
+<li><p>za pomocą pakietu stringr usunięto spacje i inne znaki błędnie pobrane przy scrapowaniu strony</p></li>
+<li><p>w nielicznych przypadkach braków w kolumnach “czas” oraz “liczba stron” uzupełniono je zerami, aby ich nie usuwać (ze względu na niewielką liczbę danych); zostały wykluczone jedynie we fragmentach analizujących wpływ właśnie tych zmiennych, aby uniknąć ryzyka zniekształcenia wyników przez wartości odstające</p></li>
+<li><p>usunięto nieliczne pozycje mające 0 ocen lub czytelników - nie wnoszą bowiem nic do badania</p></li>
+</ul>
+<p>Ze względu na fakt iż wszystkie książki na portalu są dodawane ręcznie przez użytkowników zdarzają się powtórzenia (np. różne wydania są wpisywane osobno) lub braki w danych szczegółowych, jednak problemy te nie zaistniały w części danych analizowanych pod kątem jakościowym.</p>
+</section>
+<section id="cel-projektu" class="level2">
+<h2 class="anchored" data-anchor-id="cel-projektu">Cel projektu</h2>
+<p>Celem projektu jest przeanalizowanie zależności pomiędzy przedstawionymi zmiennymi w celu odpowiedzenia na pytania badawcze:</p>
+<ol type="1">
+<li><p>Jakie pozycje są najczęściej wybierane przez czytelników?</p>
+<ol type="1">
+<li>Czy ma na to wpływ to, czy dana pozycja jest lekturą szkolną bądź częścią serii?</li>
+<li>Jacy autorzy są najbardziej popularni?</li>
+<li>Jakie gatunki są najczęściej wybierane?</li>
+</ol></li>
+<li><p>Jaki wpływ na ocenę danej pozycji mają cechy jakościowe książek?</p>
+<ol type="1">
+<li>To, czy jest lekturą (czyli czy jest czytana “z przymusu”, czy dla przyjemności)</li>
+<li>To, czy jest częścią cyklu (rozpowszechnienie)</li>
+<li>Długość (ilość stron, co bezpośrednio przekłada się na czas potrzebny na daną pozycję)</li>
+<li>To, ile osób ją przeczytało (popularność)</li>
+<li>Gatunek</li>
+</ol></li>
+</ol>
+</section>
+<section id="hipotezy-badawcze" class="level2">
+<h2 class="anchored" data-anchor-id="hipotezy-badawcze">Hipotezy badawcze</h2>
+<p>W odpowiedzi na zadane pytania postawiono hipotezy badawcze:</p>
+<ol type="1">
+<li><p>Najczęściej wybierane pozycje to książki znane w kulturze popularnej - np. dobrze znane serie fantasy, bądź lektury szkolne, oraz inne “lekkie” gatunki takie jak np. romans czy kryminał, a także najbardziej cenione klasyki literatury polskiej i zachodniej.</p>
+<ol type="1">
+<li><p>Lektury z pewnością stanowią dużą część rankingu.</p></li>
+<li><p>Duży udział w rankingu mają również książki będące częścią serii.</p></li>
+<li><p>Najbardziej popularni są autorzy polscy lub angielskojęzyczni, z dużym dorobkiem literackim, tworzący beletrystykę.</p></li>
+<li><p>Najczęściej wybierane gatunki to te czytane dla przyjemności i rozrywki - fantastyka, kryminał, romans.</p></li>
+</ol></li>
+<li><p>Wpływ na ocenę mają:</p>
+<ol type="1">
+<li><p>Lektury, mimo powszechności, są średnio gorzej oceniane przez wzgląd na to, iż ich przeczytanie w przypadku większości zadeklarowanych czytelników było zapewne obowiązkiem.</p></li>
+<li><p>Książki będące częścią cyklu są zazwyczaj oceniane lepiej - cały cykl jest czytany tylko przez osoby, którym się spodobał, więc siłą rzeczy oceny bedą pozytywne.</p></li>
+<li><p>Najlepiej oceniane są książki krótsze bądź średniej długości - mogą być przystępniejsze od bardzo długich</p></li>
+<li><p>Książki bardzo popularne i ocenione przez tysiące użytkowników mają oceny wyższe - opinie negatywne są nielicznymi skrajnymi przypadkami, ponieważ nie podobająca się komuś lektura zazwczyaj nie jest kontynuowana.</p></li>
+<li><p>Najlepiej oceniane są gatunki typu fantasy, romans, kryminał - czyli lekkie i czytane dla przyjemności.</p></li>
+</ol></li>
+</ol>
+</section>
+<section id="analiza-całości-rankingu" class="level1">
+<h1>Analiza całości rankingu</h1>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Cała baza książek z lubimczytać zawiera  9991  unikatowych pozycji od  3322  różnych autorów."</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Najniższa ocena to:  3.5  otrzymało ją  1  pozycji, a dokładniej:  Zmrok . "</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Najlepszą ocene, tj   9.6  - otrzymała  1  książek, a dokładnie to:  Inwestowanie dla każdego ."</code></pre>
+</div>
+</div>
+<p>Tak wygląda kilka pierwszych wygrywających pozycji:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tytuł</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Średnia ocena</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba ocen</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba czytelników</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba opinii</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pozycja w rankingu</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i Kamień Filozoficzny</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">84701</td>
+<td style="text-align: right;">126347</td>
+<td style="text-align: right;">5137</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Komnata Tajemnic</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">70551</td>
+<td style="text-align: right;">105836</td>
+<td style="text-align: right;">2291</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i więzień Azkabanu</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">67667</td>
+<td style="text-align: right;">102262</td>
+<td style="text-align: right;">2223</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Czara Ognia</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">64215</td>
+<td style="text-align: right;">98009</td>
+<td style="text-align: right;">1882</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i Zakon Feniksa</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">59895</td>
+<td style="text-align: right;">91951</td>
+<td style="text-align: right;">1694</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Harry Potter i Książę Półkrwi</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">58355</td>
+<td style="text-align: right;">89941</td>
+<td style="text-align: right;">1560</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Harry Potter i insygnia śmierci</td>
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">57860</td>
+<td style="text-align: right;">89324</td>
+<td style="text-align: right;">2100</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hobbit, czyli tam i z powrotem</td>
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">7.7</td>
+<td style="text-align: right;">57037</td>
+<td style="text-align: right;">84765</td>
+<td style="text-align: right;">3063</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1984</td>
+<td style="text-align: left;">George Orwell</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53512</td>
+<td style="text-align: right;">91219</td>
+<td style="text-align: right;">3462</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mistrz i Małgorzata</td>
+<td style="text-align: left;">Michaił Bułhakow</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">53139</td>
+<td style="text-align: right;">92115</td>
+<td style="text-align: right;">3363</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ostatnie życzenie</td>
+<td style="text-align: left;">Andrzej Sapkowski</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">52007</td>
+<td style="text-align: right;">78622</td>
+<td style="text-align: right;">2593</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cień wiatru</td>
+<td style="text-align: left;">Carlos Ruiz Zafón</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">48221</td>
+<td style="text-align: right;">86045</td>
+<td style="text-align: right;">4604</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mężczyźni, którzy nienawidzą kobiet</td>
+<td style="text-align: left;">Stieg Larsson</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">44465</td>
+<td style="text-align: right;">72738</td>
+<td style="text-align: right;">3581</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Krew elfów</td>
+<td style="text-align: left;">Andrzej Sapkowski</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">44207</td>
+<td style="text-align: right;">67316</td>
+<td style="text-align: right;">1557</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Igrzyska śmierci. Wydanie ilustrowane</td>
+<td style="text-align: left;">Suzanne Collins, Nico Delort</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">44115</td>
+<td style="text-align: right;">69503</td>
+<td style="text-align: right;">4064</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Zmierzch. Wydanie specjalne</td>
+<td style="text-align: left;">Stephenie Meyer</td>
+<td style="text-align: right;">6.3</td>
+<td style="text-align: right;">44086</td>
+<td style="text-align: right;">65026</td>
+<td style="text-align: right;">3866</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Zbrodnia i kara</td>
+<td style="text-align: left;">Fiodor Dostojewski</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">42778</td>
+<td style="text-align: right;">68763</td>
+<td style="text-align: right;">2072</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Kod Leonarda da Vinci</td>
+<td style="text-align: left;">Dan Brown</td>
+<td style="text-align: right;">7.2</td>
+<td style="text-align: right;">42085</td>
+<td style="text-align: right;">65104</td>
+<td style="text-align: right;">2018</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Miecz przeznaczenia</td>
+<td style="text-align: left;">Andrzej Sapkowski</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">40973</td>
+<td style="text-align: right;">61340</td>
+<td style="text-align: right;">1447</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oskar i pani Róża</td>
+<td style="text-align: left;">Éric-Emmanuel Schmitt</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">40713</td>
+<td style="text-align: right;">64096</td>
+<td style="text-align: right;">3474</td>
+<td style="text-align: right;">20</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>Poniższy wykres przedstawia rozkład ocen z całego rankingu - widać wyraźnie, że zdecydowana większość ocen oscyluje wokół 7.5 (w skali 1 do 10). Zapewnie wynika to z faktu, iż niewiele osób nie polubiwszy danej książki, zdecyduje się ją dokończyć i ocenić.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>H 2.3. Książki przeczytane przez duża liczbę osób są średnio lepiej oceniane.</strong></p>
+<p>Poniższy wykres przedstawia związek pomiędzy średnią oceną a liczbą czytelników/liczbą ocen.</p>
+<p>Pomimo widocznego na wykresie lekkiego wzrostu średniej oceny wraz ze wzrostem liczby czytelników, współczynnik korelacji Pearsona jest niewielki- a więc nie ma znaczącej korelacji pomiędzy liczbą ocen/czytelników a wysokością średniej oceny.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Współczynnik korelacji Pearsona pomiędzy liczbą czytelników a średnia oceną wynosi zaledwie  0.138  . Nie jest to zatem znacząca korelacja."</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="analiza-najwyższych-w-rankingu-pozycji" class="level1">
+<h1>Analiza najwyższych w rankingu pozycji</h1>
+<section id="analiza-różnic-między-lekturami-szkolnymi-cyklami-a-resztą-pozycji" class="level2">
+<h2 class="anchored" data-anchor-id="analiza-różnic-między-lekturami-szkolnymi-cyklami-a-resztą-pozycji">Analiza różnic między lekturami szkolnymi &amp; cyklami, a resztą pozycji</h2>
+<p><strong>H 1.1 Lektury z pewnością stanowią dużą część rankingu.</strong></p>
+<p><strong>H 1.2 Duży udział w rankingu mają również książki będące częścią serii.</strong></p>
+<p>Porównanie udziału i ocen lektur do innych książek:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Średnia wszystkich ocen:  7.39"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Spośród analizowanych  359  książek,  42  to lektury - poza nimi, jeszcze  317  pozycji. Czyli lektury stanowią  13  procent zbioru. Jednak jesli spojrzymy tylko na 100 pierwszych najpopularniejszych pozycji, to stanowią aż 23.5  procent."</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Lektury średnio uzyskują ocenę  6.68  a inne książki -  7.49 ."</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Najlepiej oceniania lektura to: ' 1984 ' oceniona na  8.4  a najlepiej oceniona pozycja niebędąca lekturą to ' Droga Królów ' oceniona na  8.8  ."</code></pre>
+</div>
+</div>
+<p>Zatem istotnie lektury mają dość duży udział w rankingu i średnio gorsze oceny. Wynika to zapewne z ich obowiązkowości - są powszechnie czytane, ale zazwyczaj z przymusu, co z pewnością wpływa na odbiór danego dzieła.</p>
+<p>Porównanie ocen i udziału książek będących elementami serii:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Książki będące częściami serii to  58.8  procent; średnio otrzmują ocenę  7.5  podczas gdy książki niebędące częścią serii są średnio oceniane na:  7.2  ."</code></pre>
+</div>
+</div>
+<p>Zatem istotnie książki będące elementem cyklu stanowią znacząca część zbioru danych i mają średnio lepsze oceny. Wynika to zapewne z faktu, że w wiele z najbardziej rozpowszechnionych w kulturze popularnej książek - np. Harry Potter, Wiedźmin czy Gra o tron - są właśnie seriami, tak jak zresztą większość literatury fantastycznej, która stanowi zdecydowaną większość w tym rankingu (co widać na wykresie w dalszej części opracowania). Podział zbioru ze względu na bycie lekturą oraz na bycie częścią serii obrazują poniższe wykresy:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><strong>H 4.1. Lektury, mimo powszechności, są średnio gorzej oceniane przez wzgląd na to, iż ich przeczytanie w przypadku większości zadeklarowanych czytelników było zapewne obowiązkiem.</strong></p>
+<p><strong>4.2. Książki będące częścią cyklu są zazwyczaj oceniane lepiej - cały cykl jest czytany tylko przez osoby, którym się spodobał, więc siłą rzeczy oceny bedą pozytywne.</strong></p>
+<p>Poniższe wykresy przedstawiają rozkład ocen w zależności:</p>
+<p>1) od tego, czy dana pozycja jest częścią cyklu</p>
+<p>2) od tego, czy dana pozycja jest lekturą</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Na przedstawionych wykresach widać, że:</p>
+<p>1) książki będące częścią cyklu uzyskują nieco częściej nieco wyższe oceny niż książki stand-alone</p>
+<p>2) książki niebędące lekturami wyraźnie otrzymują o wiele częściej pozytywne oceny, niż lektury.</p>
+<section id="długość-książki-a-ocena" class="level4">
+<h4 class="anchored" data-anchor-id="długość-książki-a-ocena">Długość książki a ocena</h4>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Korelacja między średnią oceną a długością książki wynosi  0.358 . Jest to zatem umiarkowana korelacja."</code></pre>
+</div>
+</div>
+<p><strong>H 2.3. Najlepiej oceniane są książki krótsze bądź średniej długości - mogą być przystępniejsze od bardzo długich</strong></p>
+<p>Poniższe wykres obrazuje korelację pomiędzy średnią oceną książki a jej długością (liczba stron):</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Współczynnik korelacji Pearsona miał tu wartość nieco powyżej 0.3 z czego można wnioskować o umiarkowanym wpływie długości książki na ocenę. Poniższy wykres przedstawia tę zależność z podziałem książek na kategorie wg liczby stron (książki krótkie, średnie, długie i bardzo długie)</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>O dziwo, pozycje znacząco dłuższe są średnio ocenianie lepiej. Prawdopodobnie ma na to wpływ dominujący wśród nich gatunek:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Który jest zazwyczaj lepiej oceniany (opisane w dalszej części projektu).</p>
+</section>
+</section>
+<section id="autorzy" class="level2">
+<h2 class="anchored" data-anchor-id="autorzy">Autorzy</h2>
+<p><strong>H 2.Najbardziej popularni są autorzy polscy lub angielskojęzyczni, z dużym dorobkiem literackim, tworzący beletrystykę.</strong></p>
+<p>Grupuję dane wg autorów - zliczam, ile razy wystąpili w rankingu, jaka jest średnia ocena wszystkich ich książek, jakie gatunki, ile łącznie mają czytelników, ile stron łącznie napisali i ile czasu trzeby by, by je wszystkie przeczytać.</p>
+<p>Poniższa tabela przedstawia najbardziej popularnych (pod względem liczby ich książek, które znalazły się w rankingu):</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba książek</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba lektur</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Średnia ocena</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Gatunki</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Remigiusz Mróz</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: left;">kryminał, sensacja, thriller, literatura obyczajowa, romans, fantasy, science fiction, romantasy</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stephen King</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.5</td>
+<td style="text-align: left;">kryminał, sensacja, thriller, horror, fantasy, science fiction</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Andrzej Sapkowski</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Camilla Läckberg</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: left;">kryminał, sensacja, thriller</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.0</td>
+<td style="text-align: left;">literatura młodzieżowa, fantasy, science fiction, literatura piękna</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cassandra Clare</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.0</td>
+<td style="text-align: left;">fantasy, science fiction, kryminał, sensacja, thriller</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">George R.R. Martin</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dan Brown</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.0</td>
+<td style="text-align: left;">kryminał, sensacja, thriller, literatura piękna</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Henryk Sienkiewicz</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: left;">literatura młodzieżowa, klasyka, powieść historyczna</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Jo Nesbø</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: left;">kryminał, sensacja, thriller, &nbsp;kryminał,&nbsp;sensacja,&nbsp;thriller&nbsp;</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stephenie Meyer</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6.4</td>
+<td style="text-align: left;">romantasy, fantasy, science fiction, kryminał, sensacja, thriller</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>Poniższy wykres obrazuje ilość książek przypadający na najbardziej popularnych autorów, wraz z dominującymi w ich twórczości gatunkami:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>##Najlepiej oceniani autorzy (z łączną oceną ich twórczości powyżej średniej):</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Średnia ocena autora</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba książek</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba lektur</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tytuły</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Gatunki</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Brandon Sanderson</td>
+<td style="text-align: right;">8.8</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Droga Królów</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mario Puzo</td>
+<td style="text-align: right;">8.7</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Ojciec chrzestny</td>
+<td style="text-align: left;">kryminał, sensacja, thriller</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Aleksander Dumas</td>
+<td style="text-align: right;">8.6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Hrabia Monte Christo</td>
+<td style="text-align: left;">klasyka</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Margaret Mitchell</td>
+<td style="text-align: right;">8.5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Przeminęło z wiatrem</td>
+<td style="text-align: left;">klasyka</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Markus Zusak</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Złodziejka książek</td>
+<td style="text-align: left;">literatura piękna</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Michaił Bułhakow</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Mistrz i Małgorzata</td>
+<td style="text-align: left;">klasyka</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Hobbit, czyli tam i z powrotem, Drużyna Pierścienia, Dwie wieże, Powrót Króla, Władca Pierścieni, Silmarillion. Edycja specjalna z ilustracjami autora</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Khaled Hosseini</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Chłopiec z latawcem</td>
+<td style="text-align: left;">literatura piękna</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Kristin Hannah</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Słowik</td>
+<td style="text-align: left;">powieść historyczna</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">George R.R. Martin</td>
+<td style="text-align: right;">8.2</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">Gra o tron, Starcie królów, Nawałnica mieczy. Stal i śnieg, Nawałnica mieczy. Krew i złoto, Uczta dla wron. Cienie śmierci, Uczta dla wron: Sieć spisków, Taniec ze smokami. Część 1, Taniec ze smokami. Część 2</td>
+<td style="text-align: left;">fantasy, science fiction</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>#Najbardziej popularni autorzy (ze względu na liczbę czytelników):</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Autor</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba książek</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Łączna liczba czytelników</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Remigiusz Mróz</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">305704</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Stephen King</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">315257</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Andrzej Sapkowski</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">528223</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Camilla Läckberg</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">229735</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">J.K. Rowling</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">744766</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cassandra Clare</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">235435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">George R.R. Martin</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">311836</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dan Brown</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">219825</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Henryk Sienkiewicz</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">179453</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">J.R.R. Tolkien</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">290296</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+</section>
+<section id="gatunki" class="level2">
+<h2 class="anchored" data-anchor-id="gatunki">Gatunki</h2>
+<p><strong>H 3.Najczęścięj wybierane gatunki to te czytane dla przyjemności i rozrywki - fantastyka, kryminał, romans.</strong></p>
+<p>Poniższe tabelki przedstawiają ilośc książek każdego gatunku w zestawieniu, odpowiednio</p>
+<ol type="1">
+<li>łącznie z lekturami</li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Gatunek</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba pozycji</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">fantasy, science fiction</td>
+<td style="text-align: right;">91</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kryminał, sensacja, thriller</td>
+<td style="text-align: right;">69</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura piękna</td>
+<td style="text-align: right;">54</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: right;">37</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">klasyka</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">literatura obyczajowa, romans</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">utwór dramatyczny</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">horror</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura dziecięca</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">romantasy</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">biografia, autobiografia, pamiętnik</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">powieść historyczna</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">reportaż</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">&nbsp;fantasy,&nbsp;science&nbsp;fiction&nbsp;</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura podróżnicza</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">popularnonaukowa</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&nbsp;kryminał,&nbsp;sensacja,&nbsp;thriller&nbsp;</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">opowiadania, powieści dla dzieci</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">powieść przygodowa</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">publicystyka literacka, eseje</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&nbsp;reportaż&nbsp;</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<ol start="2" type="1">
+<li><p>Wyłączając lektury:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="table-responsive">
+<table class="table table-hover table-condensed table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Gatunek</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Liczba pozycji</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">fantasy, science fiction</td>
+<td style="text-align: right;">89</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kryminał, sensacja, thriller</td>
+<td style="text-align: right;">69</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura piękna</td>
+<td style="text-align: right;">48</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">literatura młodzieżowa</td>
+<td style="text-align: right;">35</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura obyczajowa, romans</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">klasyka</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">horror</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">romantasy</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">literatura dziecięca</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">biografia, autobiografia, pamiętnik</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">powieść historyczna</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">reportaż</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&nbsp;fantasy,&nbsp;science&nbsp;fiction&nbsp;</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">literatura podróżnicza</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">utwór dramatyczny</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">&nbsp;kryminał,&nbsp;sensacja,&nbsp;thriller&nbsp;</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">popularnonaukowa</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">powieść przygodowa</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">&nbsp;reportaż&nbsp;</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div></li>
+</ol>
+<p>Poniższe wykresy obrazują liczebności w danych gatunkach, odpowiednio razem z lekturami i bez lektur.</p>
+<p>Wielkość segmentu zależy od tego, ile książek danego gatunku znalazło się w rankingu.</p>
+<p>Biorąc pod uwagę lektury:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Wyłączając ze zbioru lektury:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Widać wyraźnie dominację kryminały, fantastyki, literatury pięknej i młodzieżowej. Przy wyłączeniu ze zbioru lektur, stosunek większości gatunków pozostaje taki sam poza niewidocznym już udziałem utworu dramatycznego.</p>
+<p><strong>H 4.4. Najlepiej oceniane są gatunki typu fantasy, romans, kryminał - czyli lekkie i czytane dla przyjemności.</strong></p>
+<p>Poniższy wykres przedstawia rozkład ocen z podziałem na gatunek. Zostały tu przedstawione tylko gatunki o odpowiednio dużej liczbie pozycji (np. reportaży jest tylko parę, więc trudno tu mówić o rozkładzie ocen).</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Wyraźnie widać, że w fantastyce i kryminałach dominują pozytywne oceny, podczas gdy np. klasyka czy literatura pięna jest oceniana dość różnie.</p>
+<p>Poniższy wykres obrazuje również rozkład ocen ze względu na gatunek, ale liczba kropek odpowiadająca liczbie pozycji danego gatunku przystępniej niż histogram pomaga zwizualizow liczebność każdego z gatunków.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="infografiki" class="level1">
+<h1>Infografiki</h1>
+<section id="opisy-książek" class="level2">
+<h2 class="anchored" data-anchor-id="opisy-książek">Opisy książek</h2>
+<p>Poniższy wykres przedstawia najczęściej pojawiąjące się w opisach słowa:</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="projekt_3_analiza_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="graf-wizualizujący-podobieństwa" class="level2">
+<h2 class="anchored" data-anchor-id="graf-wizualizujący-podobieństwa">Graf wizualizujący podobieństwa</h2>
+<p>Na przedstawionym poniżej grafie figuruje, ze względu na czytelność, tylko około 200 pozycji (wybrano te z największą liczbą ocen). Graf przedstawia książki podobne do siebie ze względu na poziom indeksu prawdpodobieństwa, zależnego od:</p>
+<ul>
+<li><p>tego, czy są tego samego gatunku (warunek konieczny)</p></li>
+<li><p>czy mają tego samego autora</p></li>
+<li><p>czy są w tym samym cykly (serii)</p></li>
+</ul>
+<p>Widoczne zgrupowania to klastry najbardziej podobnych so siebie pozycji; największe znaczenie miał tu gatunek.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graf.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Wizualizacja wykonana w Gephi</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="podsumowanie" class="level1">
+<h1>Podsumowanie</h1>
+<p>W wyniku analizy pozyskanych danych zauważono, że:</p>
+<ul>
+<li><p>na popularność książek największy wpływ ma przynależenie do kategorii literatury rozrywkowej i fikcyjnej</p></li>
+<li><p>na ocenę największy wpływ ma to, czy książka jest lekturą - jest wtedy oceniana gorzej</p></li>
+<li><p>na rozpowszechnienie największy wpływ ma to, czy dana książka jest częścią cyklu - te stanowiły znaczącą większość zbioru.</p></li>
+</ul>
+<p>Warto zauważyć, że przedstawione dane nie prezentują przekroju społeczeństwa, tylko dość niewielką grupę osób. Można śmiało przypuszczać, że ze strony służącej do prowadzenia czytelniczej historii i oceniania ulubionych dzieł korzystają tylko pasjonaci literatury, którzy czytają o wiele więcej niż przeciętna osoba (wg raportu BN w 2023 tylko 43% respondentów przeczytało w ciągu roku choć jedną książkę), i sięgają po bardziej zróżnicowane pozycje, niż osoba nie czytająca regularnie, która mogła mieć styczność tylko i wyłącznie z kanonem lektur i podręcznikami akademickimi. Do tego grona należą też z pewnością tylko osoby regularnie i swobodnie korzystające z internetu - co wyklucza np. większość seniorów i z pewnością wpływa na popularność poszczególnych gatunków (np. bardzo duży udział fantastyki i science fiction, a dość mały poza lekturami klasyków).</p>
+<section id="źródła" class="level2">
+<h2 class="anchored" data-anchor-id="źródła">Źródła</h2>
+<ul>
+<li><p><a href="https://lubimyczytac.pl/katalog?page=1&amp;listId=booksFilteredList&amp;rating%5B%5D=0&amp;rating%5B%5D=10&amp;publishedYear%5B%5D=1200&amp;publishedYear%5B%5D=2024&amp;bookType=1&amp;catalogSortBy=ratings-desc&amp;paginatorType=Standard">Ranking na lubimyczytac</a></p></li>
+<li><p><a href="https://r-graph-gallery.com/" class="uri">R graph gallery</a></p></li>
+<li><p><a href="https://www.bn.org.pl/raporty-bn/stan-czytelnictwa-w-polsce/stan-czytelnictwa-w-polsce-w-2023">Raport o czytelnictwie</a></p></li>
+<li><p><a href="https://chromewebstore.google.com/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb">SelectorGadget wtyczka do Chrome</a></p></li>
+</ul>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
